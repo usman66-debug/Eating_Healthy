@@ -12,7 +12,7 @@
           <span class="sidebar-user-role">管理员</span>
         </div>
       </div>
-      <el-menu default-active="2" class="el-menu-vertical-demo" :collapse="isCollapsed" router>
+      <el-menu :default-active="route.path" class="el-menu-vertical-demo" :collapse="isCollapsed" router>
         <template v-for="menu in filterMenus" :key="menu.id">
           <el-menu-item :index="menu.path" v-if="!menu.children || menu.children.length === 0">
             <el-icon><component :is="menu.icon" /></el-icon>
@@ -36,7 +36,7 @@
         </div>
       </div>
     </aside>
-    <div class="layout-main">
+    <div class="layout-main" :class="{collapsed: isCollapsed}">
       <header class="layout-header">
         <div class = "header-left">
           <el-breadcrumb separator="/">
@@ -67,6 +67,13 @@
           </el-dropdown>
         </div>
       </header>
+      <main class="layout-content">
+        <router-view v-slot="{ Component }">
+          <transition name="slide-fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+      </main>
     </div>
   </div>
 </template>
