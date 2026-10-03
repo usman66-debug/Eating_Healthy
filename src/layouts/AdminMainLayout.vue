@@ -1,24 +1,40 @@
 <template>
   <div class="layout-container">
-    <aside class="layout-sidebar">
+    <aside class="layout-sidebar" :class="{collapsed: isCollapsed}">
       <div class="sidebar-logo">
-        <h1 class="font-display">Healthy<span>Diet</span></h1>
+        <h1 class="font-display" v-if="!isCollapsed">Healthy<span>Diet</span></h1>
+        <el-icon class="logo-icon" v-else><Sunny /></el-icon>
       </div>
-      <div class="sidebar-user">
+      <div class="sidebar-user" v-if="!isCollapsed">
         <el-avatar src="@/assets/heros.png" :size="32" />
         <div class="sidebar-user-info">
           <span class="sidebar-user-name">系统管理员</span>
           <span class="sidebar-user-role">管理员</span>
         </div>
       </div>
-      <el-menu default-active="2" class="el-menu-vertical-demo">
+      <el-menu default-active="2" class="el-menu-vertical-demo" :collapse="isCollapsed">
         <template v-for="menu in filterMenus" :key="menu.id">
           <el-menu-item :index="menu.path" v-if="!menu.children || menu.children.length === 0">
             <el-icon><component :is="menu.icon" /></el-icon>
-            <sapm>{{ menu.menuName }}</sapm>
+            <span>{{ menu.menuName }}</span>
           </el-menu-item>
+          <el-sub-menu v-else :index="menu.path">
+            <template #title>
+              <el-icon><component :is="menu.icon" /></el-icon>
+              <span>{{ menu.menuName }}</span>
+            </template>
+            <el-menu-item v-for="child in menu.children" :key="child.id" :index="child.path">
+              <span>{{ child.menuName }}</span>
+            </el-menu-item>
+          </el-sub-menu>
         </template>
       </el-menu>
+      <div class="sidebar-footer">
+        <div class="sidebar-collapse-btn" @click="toggleCollapse">
+          <el-icon ><Fold v-if="!isCollapsed"/><Expand v-else /></el-icon>
+          <span v-if="!isCollapsed">收起菜单</span>
+        </div>
+      </div>
     </aside>
   </div>
 </template>
@@ -30,6 +46,12 @@ import defaultMenus from "@/data/menuData.js"
 const filterMenus = computed(() => {
   return defaultMenus
 })
+
+const isCollapsed = ref(false)
+
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <style scoped>
