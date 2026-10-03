@@ -5,6 +5,16 @@ const routes = [
     path: '/admin',
     name: 'AdminLayout',
     component: () => import('@/layouts/AdminMainLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/Dashboard/DashboardPage.vue'),
+        meta: {
+          title: '首页',
+        },
+      },
+    ],
   },
 ]
 

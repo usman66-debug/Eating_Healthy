@@ -12,7 +12,7 @@
           <span class="sidebar-user-role">管理员</span>
         </div>
       </div>
-      <el-menu default-active="2" class="el-menu-vertical-demo" :collapse="isCollapsed">
+      <el-menu default-active="2" class="el-menu-vertical-demo" :collapse="isCollapsed" router>
         <template v-for="menu in filterMenus" :key="menu.id">
           <el-menu-item :index="menu.path" v-if="!menu.children || menu.children.length === 0">
             <el-icon><component :is="menu.icon" /></el-icon>
@@ -36,12 +36,47 @@
         </div>
       </div>
     </aside>
+    <div class="layout-main">
+      <header class="layout-header">
+        <div class = "header-left">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="item.path">{{ item.title }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </div>
+        <div class = "header-right">
+          <el-dropdown @command="handleCommand">
+            <span class="user-trigger">
+              <el-avatar src="@/assets/heros.png" :size="32" />
+              <span class="user-name">系统管理员</span>
+              <el-icon >
+                <arrow-down />
+              </el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="profile">
+                  <el-icon><User /></el-icon>
+                  个人中心
+                </el-dropdown-item>
+                <el-dropdown-item command="logout">
+                  <el-icon><Switch-button /></el-icon>
+                  退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </header>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref ,computed} from 'vue'
+import { ref ,computed,onMounted} from 'vue'
 import defaultMenus from "@/data/menuData.js"
+import {useRoute} from 'vue-router'
+
+const route = useRoute()
 
 const filterMenus = computed(() => {
   return defaultMenus
@@ -51,6 +86,14 @@ const isCollapsed = ref(false)
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
+}
+
+const breadcrumbs = computed(() => {
+  return route.matched.filter(item => item.meta.title).map(item => ({path: item.path, title: item.meta.title}))
+})
+
+const handleCommand = (command) => {
+  console.log(command)
 }
 </script>
 
