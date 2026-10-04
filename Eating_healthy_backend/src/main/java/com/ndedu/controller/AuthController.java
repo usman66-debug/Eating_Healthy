@@ -1,6 +1,7 @@
 package com.ndedu.controller;
 
 import com.ndedu.DTO.command.UserLoginCommandDTO;
+import com.ndedu.common.Result;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,10 +14,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@Valid @RequestBody UserLoginCommandDTO request) {
+    public Result<?> login(@Valid @RequestBody UserLoginCommandDTO request) {
     System.out.println(request.getUsername());
         System.out.println(request.getPassword());
 
-        return null;
+        return Result.ok("登录成功");
     }
 }
