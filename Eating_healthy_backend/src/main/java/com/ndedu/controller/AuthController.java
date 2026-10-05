@@ -1,6 +1,7 @@
 package com.ndedu.controller;
 
 import com.ndedu.DTO.command.UserLoginCommandDTO;
+import com.ndedu.DTO.response.UserLoginResponseDTO;
 import com.ndedu.common.Result;
 import com.ndedu.service.SysUserService;
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class AuthController {
     public Result<?> login(@Valid @RequestBody UserLoginCommandDTO request) {
     System.out.println(request.getUsername());
         System.out.println(request.getPassword());
-        sysUserService.login(request.getUsername(),request.getPassword());
-        return Result.ok("登录成功");
+        UserLoginResponseDTO responseDTO = sysUserService.login(request.getUsername(),request.getPassword());
+        return Result.ok(responseDTO);
     }
 }

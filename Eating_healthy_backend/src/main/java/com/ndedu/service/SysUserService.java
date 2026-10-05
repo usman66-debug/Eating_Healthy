@@ -53,10 +53,57 @@ public class SysUserService {
 
         UserLoginResponseDTO responseDTO = new UserLoginResponseDTO();
         responseDTO.setToken(token);
-        responseDTO.setUserInfo(sysUser);
-        responseDTO.setMenus(menuTree);
+        responseDTO.setUserInfo(convertUserInfoToDTO(sysUser));
+        responseDTO.setMenus(convertMenuToDTO(menuTree));
 
         return responseDTO;
+    }
+
+    //转换菜单为DTO列表
+    private List<UserLoginResponseDTO.Menu> convertMenuToDTO(List<SysMenu> menus){
+        return menus.stream()
+                .map(this::convertSignlMenu)
+                .collect(Collectors.toList());
+    }
+
+    //递归转换每个菜单
+    private UserLoginResponseDTO.Menu convertSignlMenu(SysMenu menu){
+        UserLoginResponseDTO.Menu dto = new UserLoginResponseDTO.Menu();
+        dto.setId(menu.getId());
+        dto.setMenuName(menu.getMenuName());
+        dto.setPath(menu.getPath());
+        dto.setComponent(menu.getComponent());
+        dto.setIcon(menu.getIcon());
+        dto.setSort(menu.getSort());
+        dto.setMenuType(menu.getMenuType());
+        dto.setPermission(menu.getPermission());
+        dto.setVisible(menu.getVisible());
+        dto.setStatus(menu.getStatus());
+        dto.setCreateTime(menu.getCreateTime());
+        dto.setUpdateTime(menu.getUpdateTime());
+
+
+        if(menu.getChildren() != null){
+            dto.setChildren(convertMenuToDTO(menu.getChildren()));
+        }
+        return dto;
+    }
+
+    //处理用户的数据
+    private UserLoginResponseDTO.UserInfo convertUserInfoToDTO(SysUser sysUser){
+        UserLoginResponseDTO.UserInfo dto = new UserLoginResponseDTO.UserInfo();
+        dto.setId(sysUser.getId());
+        dto.setUsername(sysUser.getUsername());
+        dto.setNickname(sysUser.getNickname());
+        dto.setPhone(sysUser.getPhone());
+        dto.setEmail(sysUser.getEmail());
+        dto.setAvatar(sysUser.getAvatar());
+        dto.setGender(sysUser.getGender());
+        dto.setStatus(sysUser.getStatus());
+        dto.setCreateTime(sysUser.getCreateTime());
+        dto.setUpdateTime(sysUser.getUpdateTime());
+        dto.setRoles(sysUser.getRoles());
+        return dto;
     }
 
     //构建菜单树

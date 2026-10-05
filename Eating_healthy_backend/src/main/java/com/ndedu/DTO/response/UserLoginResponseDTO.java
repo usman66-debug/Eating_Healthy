@@ -11,6 +11,7 @@ public class UserLoginResponseDTO {
     private String token;
     private UserInfo userInfo;
 
+    @Data
     public static class Menu {
         private Long id;
         private Long parentId;
@@ -28,6 +29,7 @@ public class UserLoginResponseDTO {
         private List<Menu> children;
     }
 
+    @Data
     public static class UserInfo {
         private Long id;
         private String username;
