@@ -1,8 +1,11 @@
 package com.ndedu.DTO.response;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Data
 public class UserLoginResponseDTO {
     private List<Menu> menus;
     private String token;

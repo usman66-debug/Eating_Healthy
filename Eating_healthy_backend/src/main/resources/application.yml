@@ -11,3 +11,7 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  secret: Y29taW5nd2luZHktaGVhbHRoeS1kaWV0LXNlY3JldC1rZXktMjAyNi1wcm9kLXNlY3VyZQ==
+  expiration: 86400000
