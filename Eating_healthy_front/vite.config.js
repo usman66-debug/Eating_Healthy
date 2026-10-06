@@ -18,7 +18,15 @@ export default defineConfig({
   ],
   resolve:{
       alias: {
-        '@': resolve(__dirname, 'src'),
+        '@': resolve(import.meta.dirname, 'src'),
       },
+    },
+  server:{
+    proxy:{
+      '/api':{
+        target:'http://127.0.0.1:5500',
+        changeOrigin:true,
+      }
     }
+  }
 })

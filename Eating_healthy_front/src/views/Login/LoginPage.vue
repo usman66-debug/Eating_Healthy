@@ -60,6 +60,7 @@
 </template>
 <script setup>
 import { reactive, ref } from 'vue'
+import { login } from '@/apis/auth'
 
 const features = [
     { icon: '🥗', title: '智能食谱推荐', desc: '基于AI的个性化方案' },
@@ -81,9 +82,10 @@ const rules = reactive({
 const loading = ref(false)
 const formRef = ref(null)
 
-const handleSubmit =  () => {
-    formRef.value.validate().then(() => {
-        console.log(form)
+const handleSubmit = async () => {
+    formRef.value.validate().then(async () => {
+        loading.value = true
+        const res = await login(form)
     })
 }
 
