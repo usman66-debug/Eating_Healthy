@@ -24,4 +24,10 @@ public class GlobalExceptionHandler {
 
         return Result.error(400,message,null);
     }
+
+    //处理业务异常
+    @ExceptionHandler(BussinessException.class)
+    public Result<?> handleBussinessException(BussinessException e){
+        return Result.error(e.getCode(),e.getMessage(),null);
+    }
 }

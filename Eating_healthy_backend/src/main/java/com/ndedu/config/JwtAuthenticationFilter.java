@@ -38,9 +38,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                     //将认证信息存入Spring Security上下文
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }else{
+                    SecurityContextHolder.clearContext();
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json;charset=utf-8");
+                    response.getWriter().write("{\"code\":401,\"message\":\"token无效或过期\"}");
+                    return;
                 }
             }catch(Exception e){
-                throw new RuntimeException(e);
+                SecurityContextHolder.clearContext();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=utf-8");
+                response.getWriter().write("{\"code\":401,\"message\":\"token认证失败\"}");
+                return;
             }
         }
         chain.doFilter(request, response);

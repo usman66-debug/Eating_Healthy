@@ -3,6 +3,8 @@ package com.ndedu.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ndedu.DTO.response.UserLoginResponseDTO;
+import com.ndedu.Exception.BussinessException;
+import com.ndedu.common.ResultCode;
 import com.ndedu.entity.SysMenu;
 import com.ndedu.entity.SysUser;
 import com.ndedu.mapper.SysMenuMapper;
@@ -38,6 +40,10 @@ public class SysUserService {
         //调用MP api查询
         SysUser sysUser = sysUserMapper.selectOne(queryWrapper);
         System.out.println(sysUser);
+
+        if(sysUser == null){
+            throw new BussinessException("用户名或密码错误", ResultCode.ERROR.getCode());
+        }
 
         //查询角色
         List<String> roles = sysRoleMapper.selectRoleKeysByUserId(sysUser.getId());
