@@ -61,6 +61,11 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { login } from '@/apis/auth'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+
+const userStore = useUserStore()
+const router = useRouter()  
 
 const features = [
     { icon: '🥗', title: '智能食谱推荐', desc: '基于AI的个性化方案' },
@@ -86,6 +91,14 @@ const handleSubmit = async () => {
     formRef.value.validate().then(async () => {
         loading.value = true
         const res = await login(form)
+        console.log(res)
+        loading.value = false
+        userStore.setLoginInfo({
+          token: res.data.data.token,
+          userInfo: res.data.data.userInfo,
+          menuList: res.data.data.menus
+        })
+        router.push('/')
     })
 }
 
