@@ -1,6 +1,7 @@
 package com.ndedu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ndedu.DTO.response.UserLoginResponseDTO;
 import com.ndedu.entity.SysMenu;
 import com.ndedu.entity.SysUser;
@@ -10,6 +11,7 @@ import com.ndedu.mapper.SysUserMapper;
 import com.ndedu.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -113,5 +115,33 @@ public class SysUserService {
                 .peek(m->m.setChildren(buildMenuTree(menus,m.getId())))
                 .sorted(Comparator.comparingInt(m->m.getSort() == null ? 0 : m.getSort()))
                 .collect(Collectors.toList());
+    }
+
+    //分页查询用户列表
+    public Page<SysUser> listUsers(Page<SysUser> page, String keyword, Integer status){
+        //构建查询条件
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        //传入keyword
+        if(StringUtils.hasText(keyword)){
+            queryWrapper.and(
+                    w->w.like(SysUser::getUsername,keyword)
+                            .or().like(SysUser::getNickname,keyword)
+                            .or().like(SysUser::getPhone,keyword)
+            );
+        }
+        //传入status
+        if(status != null){
+            queryWrapper.eq(SysUser::getStatus,status);
+        }
+
+        queryWrapper.orderByDesc(SysUser::getCreateTime);
+        Page<SysUser> result = sysUserMapper.selectPage(page,queryWrapper);
+        result.getRecords().forEach(
+                u->{
+                    u.setPassword(null);
+                    u.setRoles(sysRoleMapper.selectRoleKeysByUserId(u.getId()));
+                }
+        );
+        return result;
     }
 }
