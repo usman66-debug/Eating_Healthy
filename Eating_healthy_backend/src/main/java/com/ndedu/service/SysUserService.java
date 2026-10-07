@@ -114,6 +114,22 @@ public class SysUserService {
         }
     }
 
+    //删除用户
+    public void deleteUser(Long id){
+        sysUserMapper.deleteById(id);
+        sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId,id));
+    }
+
+    //重置密码
+    public void resetPassword(Long id){
+        SysUser user = sysUserMapper.selectById(id);
+        if(user == null){
+            throw new BussinessException("用户不存在");
+        }
+        user.setPassword("123456");
+        sysUserMapper.updateById(user);
+    }
+
     //转换菜单为DTO列表
     private List<UserLoginResponseDTO.Menu> convertMenuToDTO(List<SysMenu> menus){
         return menus.stream()

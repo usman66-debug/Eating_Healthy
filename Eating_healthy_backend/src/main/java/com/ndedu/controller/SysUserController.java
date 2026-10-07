@@ -35,12 +35,25 @@ public class SysUserController {
         System.out.println(request.getUser());
         System.out.println(request.getRoleKey());
         sysUserService.addUser(request.getUser(),request.getRoleKey());
-        return Result.ok();
+        return Result.ok("添加成功");
     }
 
     @PutMapping
     public Result<?> updateUser(@Valid @RequestBody UserFormCommandDTO request){
         sysUserService.updateUser(request.getUser(),request.getRoleKey());
-        return Result.ok();
+        return Result.ok("更新成功");
     }
+
+    @DeleteMapping("/{id}")
+    public Result<?> deleteUser(@PathVariable Long id){
+        sysUserService.deleteUser(id);
+        return Result.ok("删除成功");
+    }
+
+    @PostMapping("/reset-password/{id}")
+    public Result<?> resetPassword(@PathVariable Long id){
+        sysUserService.resetPassword(id);
+        return Result.ok("密码重置成功");
+    }
+
 }
