@@ -1,14 +1,13 @@
 package com.ndedu.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ndedu.DTO.command.UserFormCommandDTO;
 import com.ndedu.common.Result;
 import com.ndedu.entity.SysUser;
 import com.ndedu.service.SysUserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -29,5 +28,13 @@ public class SysUserController {
         Page<SysUser> result = sysUserService.listUsers(page, keyword, status);
         //返回查询结果
         return Result.ok(result);
+    }
+
+    @PostMapping
+    public Result<?> addUser(@Valid @RequestBody UserFormCommandDTO request){
+        System.out.println(request.getUser());
+        System.out.println(request.getRoleKey());
+        sysUserService.addUser(request.getUser(),request.getRoleKey());
+        return Result.ok();
     }
 }

@@ -6,10 +6,13 @@ import com.ndedu.DTO.response.UserLoginResponseDTO;
 import com.ndedu.Exception.BussinessException;
 import com.ndedu.common.ResultCode;
 import com.ndedu.entity.SysMenu;
+import com.ndedu.entity.SysRole;
 import com.ndedu.entity.SysUser;
+import com.ndedu.entity.SysUserRole;
 import com.ndedu.mapper.SysMenuMapper;
 import com.ndedu.mapper.SysRoleMapper;
 import com.ndedu.mapper.SysUserMapper;
+import com.ndedu.mapper.SysUserRoleMapper;
 import com.ndedu.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,9 @@ public class SysUserService {
 
     @Autowired
     private SysMenuMapper sysMenuMapper;
+
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -65,6 +71,23 @@ public class SysUserService {
         responseDTO.setMenus(convertMenuToDTO(menuTree));
 
         return responseDTO;
+    }
+
+    public void addUser(SysUser user,String roleKey){
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SysUser::getUsername,user.getUsername());
+
+        Long count = sysUserMapper.selectCount(queryWrapper);
+        if(count > 0){
+            throw new BussinessException("用户名已存在");
+        }
+
+        //由于是后端新增的用户，设置一个默认密码
+        user.setPassword("123456");
+        //插入用户
+        sysUserMapper.insert(user);
+        //关联角色
+        associateRole(user.getId(),roleKey);
     }
 
     //转换菜单为DTO列表
@@ -149,5 +172,16 @@ public class SysUserService {
                 }
         );
         return result;
+    }
+
+    //关联角色
+    private void associateRole(Long userId,String roleKey){
+        SysRole role = sysRoleMapper.selectOne(new LambdaQueryWrapper<SysRole>().eq(SysRole::getRoleKey,roleKey));
+        if(role != null){
+            SysUserRole userRole = new SysUserRole();
+            userRole.setUserId(userId);
+            userRole.setRoleId(role.getId());
+            sysUserRoleMapper.insert(userRole);
+        }
     }
 }
