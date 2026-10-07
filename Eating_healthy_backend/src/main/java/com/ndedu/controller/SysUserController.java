@@ -37,4 +37,10 @@ public class SysUserController {
         sysUserService.addUser(request.getUser(),request.getRoleKey());
         return Result.ok();
     }
+
+    @PutMapping
+    public Result<?> updateUser(@Valid @RequestBody UserFormCommandDTO request){
+        sysUserService.updateUser(request.getUser(),request.getRoleKey());
+        return Result.ok();
+    }
 }

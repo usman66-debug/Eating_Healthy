@@ -90,6 +90,30 @@ public class SysUserService {
         associateRole(user.getId(),roleKey);
     }
 
+    //更新用户
+    public void updateUser(SysUser user,String roleKey){
+        //查询当前用户
+        SysUser sysUser = sysUserMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getId,user.getId()));
+        if(sysUser == null){
+            throw new BussinessException("用户不存在");
+        }
+        //更新用户信息
+        sysUser.setNickname(user.getNickname());
+        sysUser.setPhone(user.getPhone());
+        sysUser.setEmail(user.getEmail());
+        sysUser.setGender(user.getGender());
+        sysUser.setStatus(user.getStatus());
+        sysUserMapper.updateById(sysUser);
+
+        //更新用户
+        sysUserMapper.updateById(sysUser);
+        //更新角色
+        if(StringUtils.hasText(roleKey)){
+            sysUserRoleMapper.delete(new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getUserId,user.getId()));
+            associateRole(user.getId(),roleKey);
+        }
+    }
+
     //转换菜单为DTO列表
     private List<UserLoginResponseDTO.Menu> convertMenuToDTO(List<SysMenu> menus){
         return menus.stream()
