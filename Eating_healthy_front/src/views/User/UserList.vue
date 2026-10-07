@@ -76,8 +76,8 @@
         </div>
         <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="520px">
             <el-form :model="formData" ref="formRef" :rules="rules" label-width="80px">
-                <el-form-item label="用户名" prop="username">
-                    <el-input v-model="formData.username" placeholder="请输入用户名" />
+                <el-form-item label="用户名" prop="username" >
+                    <el-input v-model="formData.username" placeholder="请输入用户名"  :disabled="isEdit"/>
                 </el-form-item>
                 <el-form-item label="昵称" prop="nickname">
                     <el-input v-model="formData.nickname" placeholder="请输入昵称" />
@@ -126,7 +126,8 @@
 </template>
 <script setup>
 import { ref, reactive,onMounted } from 'vue'
-import { getUserListApi, addUserApi } from '@/apis/user'
+import { getUserListApi, addUserApi, updateUserApi, resetPasswordApi, deleteUserApi } from '@/apis/user'
+import { ElMessage } from 'element-plus'
 
 
 const queryParams = reactive({
@@ -156,6 +157,7 @@ const handleAdd = () => {
         username: '',
         password: '',
         nickname: '',
+        email: '',
         phone: '',
         status: 0,
         gender: 0,
@@ -169,11 +171,33 @@ const loading = ref(false)
 const tableData = ref([])
 const total = ref(0)
 // 编辑
-const handleEdit = () => { }
+const handleEdit = (row) => { 
+    isEdit.value = true
+    Object.assign(formData,{
+        id: row.id,
+        username: row.username,
+        password: row.password,
+        nickname: row.nickname,
+        email: row.email,
+        phone: row.phone,
+        status: row.status,
+        gender: row.gender,
+        roleKey: row.roleKey?.includes('ADMIN') ? 'ADMIN' : 'USER'
+    })
+    dialogVisible.value = true
+}
 // 重置密码
-const handleResetPwd = () => { }
+const handleResetPwd = async (row) => { 
+    await resetPasswordApi(row.id)
+    ElMessage.success('重置密码成功')
+    loadData()
+}
 // 删除
-const handleDelete = () => { }
+const handleDelete = async (row) => {
+    await deleteUserApi(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+ }
 // 弹窗
 const dialogVisible = ref(false)
 const formRef = ref(null)
@@ -208,6 +232,7 @@ const handleSubmit = async () => {
             loadData()
         }
     })
+    isEdit.value = false
 }
 
 
