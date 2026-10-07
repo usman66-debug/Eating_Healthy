@@ -74,11 +74,60 @@
                     @change="loadData" />
             </div>
         </div>
+        <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑用户' : '新增用户'" width="520px">
+            <el-form :model="formData" ref="formRef" :rules="rules" label-width="80px">
+                <el-form-item label="用户名" prop="username">
+                    <el-input v-model="formData.username" placeholder="请输入用户名" />
+                </el-form-item>
+                <el-form-item label="昵称" prop="nickname">
+                    <el-input v-model="formData.nickname" placeholder="请输入昵称" />
+                </el-form-item>
+                <el-row :gutter="16">
+                    <el-col :span="12">
+                        <el-form-item label="手机号" prop="phone">
+                            <el-input v-model="formData.phone" placeholder="请输入手机号" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="邮箱" prop="email">
+                            <el-input v-model="formData.email" placeholder="请输入邮箱" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row :gutter="16">
+                    <el-col :span="12">
+                        <el-form-item label="性别" prop="gender">
+                            <el-radio-group v-model="formData.gender">
+                                <el-radio :label="1">男</el-radio>
+                                <el-radio :label="2">女</el-radio>
+                                <el-radio :label="0">未知</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="角色" prop="roleKey">
+                            <el-select v-model="formData.roleKey" placeholder="请选择角色">
+                                <el-option label="管理员" value="ADMIN"/> 
+                                <el-option label="普通用户" value="USER"/>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-form-item label="状态" prop="status">
+                    <el-switch v-model="formData.status" :active-value="0" :inactive-value="1" active-text="正常" inactive-text="禁用" />
+                </el-form-item>
+            </el-form>
+            <template #footer>
+                <el-button type="primary" @click="handleSubmit">确定</el-button>
+                <el-button @click="dialogVisible = false">取消</el-button>
+            </template>
+        </el-dialog>
     </div>
 </template>
 <script setup>
 import { ref, reactive,onMounted } from 'vue'
-import { getUserListApi } from '@/apis/user'
+import { getUserListApi, addUserApi } from '@/apis/user'
+
 
 const queryParams = reactive({
     keyword: '',
@@ -101,7 +150,18 @@ const resetQuery = () => {
 }
 // 新增用户
 const handleAdd = () => {
-    console.log('新增用户')
+    isEdit.value = false
+    Object.assign(formData, {
+        id: undefined,
+        username: '',
+        password: '',
+        nickname: '',
+        phone: '',
+        status: 0,
+        gender: 0,
+        roleKey: 'ADMIN'
+    })
+    dialogVisible.value = true
 }
 
 // 列表
@@ -114,6 +174,42 @@ const handleEdit = () => { }
 const handleResetPwd = () => { }
 // 删除
 const handleDelete = () => { }
+// 弹窗
+const dialogVisible = ref(false)
+const formRef = ref(null)
+const isEdit = ref(false)
+const formData = reactive({
+    id: undefined,
+    username: '',
+    password: '',
+    nickname: '',
+    phone: '',
+    status: 0,
+    gender: 0,
+    roleKey: 'ADMIN'
+})
+
+const rules = reactive({
+    username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+    nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
+})
+
+// 提交表单
+const handleSubmit = async () => {
+    await formRef.value.validate(async (valid) => {
+        if (valid) {
+            const payLoad = {user:formData,roleKey:formData.roleKey}
+            if(!isEdit.value){
+                await addUserApi(payLoad)
+            }else{
+                await updateUserApi(payLoad)
+            }
+            dialogVisible.value = false
+            loadData()
+        }
+    })
+}
+
 
 onMounted(() => {
     loadData()

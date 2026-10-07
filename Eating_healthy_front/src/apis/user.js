@@ -8,3 +8,11 @@ export const getUserListApi = (params) => {
     })
 }
 
+export const addUserApi = (data) => {
+    return request({
+        url:'/user',
+        method:'post',
+        data
+    })
+}
+
