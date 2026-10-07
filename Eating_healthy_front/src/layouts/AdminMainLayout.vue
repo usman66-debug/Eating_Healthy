@@ -6,10 +6,12 @@
         <el-icon class="logo-icon" v-else><Sunny /></el-icon>
       </div>
       <div class="sidebar-user" v-if="!isCollapsed">
-        <el-avatar src="@/assets/heros.png" :size="32" />
+        <el-avatar :src="userStore.userInfo?.avatar" :size="32" >
+          {{ userStore.userInfo?.nickname?.charAt(0) }}
+        </el-avatar>
         <div class="sidebar-user-info">
-          <span class="sidebar-user-name">系统管理员</span>
-          <span class="sidebar-user-role">管理员</span>
+          <span class="sidebar-user-name">{{ userStore.userInfo?.nickname }}</span>
+          <span class="sidebar-user-role">{{ userStore.isAdmin() ? '管理员' : '用户' }}</span>
         </div>
       </div>
       <el-menu :default-active="route.path" class="el-menu-vertical-demo" :collapse="isCollapsed" router>
@@ -46,8 +48,10 @@
         <div class = "header-right">
           <el-dropdown @command="handleCommand">
             <span class="user-trigger">
-              <el-avatar src="@/assets/heros.png" :size="32" />
-              <span class="user-name">系统管理员</span>
+              <el-avatar :src="userStore.userInfo?.avatar" :size="32" >
+                {{ userStore.userInfo?.nickname?.charAt(0) }}
+              </el-avatar>
+              <span class="user-name">{{ userStore.userInfo?.nickname }}</span>
               <el-icon >
                 <arrow-down />
               </el-icon>
@@ -81,11 +85,36 @@
 <script setup>
 import { ref ,computed,onMounted} from 'vue'
 import defaultMenus from "@/data/menuData.js"
-import {useRoute} from 'vue-router'
+import {useRoute,useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user.js'
+
+const userStore = useUserStore()
 
 const route = useRoute()
+const router = useRouter()
+
+function prefixMenuPath(menus) {
+  return menus.map(m => {
+    return {
+      ...m,
+
+      path:
+        m.path && !m.path.startsWith('/admin')
+          ? '/admin' + m.path
+          : m.path,
+
+      children:
+        m.children?.length > 0
+          ? prefixMenuPath(m.children)
+          : m.children
+    }
+  })
+}
 
 const filterMenus = computed(() => {
+  if(userStore.menuList.length > 0){
+    return prefixMenuPath(userStore.menuList)
+  }
   return defaultMenus
 })
 
@@ -100,7 +129,10 @@ const breadcrumbs = computed(() => {
 })
 
 const handleCommand = (command) => {
-  console.log(command)
+  if(command === 'logout'){
+    userStore.logout()
+    router.push('/login')
+  }
 }
 </script>
 

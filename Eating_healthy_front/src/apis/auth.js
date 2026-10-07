@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export const login = (data) => {
+export const loginApi = (data) => {
   return request({
     url:'/auth/login',
     method:'post',

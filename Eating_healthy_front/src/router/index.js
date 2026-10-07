@@ -18,6 +18,14 @@ const routes = [
           title: '首页',
         },
       },
+      {
+        path: 'user/list',
+        name: 'UserList',
+        component: () => import('@/views/User/UserList.vue'),
+        meta: {
+          title: '用户列表',
+        },
+      },
     ],
   },
   {

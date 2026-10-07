@@ -60,7 +60,7 @@
 </template>
 <script setup>
 import { reactive, ref } from 'vue'
-import { login } from '@/apis/auth'
+import { loginApi } from '@/apis/auth'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 
@@ -90,7 +90,7 @@ const formRef = ref(null)
 const handleSubmit = async () => {
     formRef.value.validate().then(async () => {
         loading.value = true
-        const res = await login(form)
+        const res = await loginApi(form)
         console.log(res)
         loading.value = false
         userStore.setLoginInfo({
