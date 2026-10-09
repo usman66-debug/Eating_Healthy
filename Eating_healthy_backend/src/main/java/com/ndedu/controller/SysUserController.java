@@ -32,8 +32,6 @@ public class SysUserController {
 
     @PostMapping
     public Result<?> addUser(@Valid @RequestBody UserFormCommandDTO request){
-        System.out.println(request.getUser());
-        System.out.println(request.getRoleKey());
         sysUserService.addUser(request.getUser(),request.getRoleKey());
         return Result.ok("添加成功");
     }
