@@ -15,3 +15,7 @@ mybatis-plus:
 jwt:
   secret: Y29taW5nd2luZHktaGVhbHRoeS1kaWV0LXNlY3JldC1rZXktMjAyNi1wcm9kLXNlY3VyZQ==
   expiration: 86400000
+
+file:
+  upload-path: ./uploads/
+
