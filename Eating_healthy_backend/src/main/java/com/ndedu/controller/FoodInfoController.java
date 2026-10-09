@@ -7,10 +7,7 @@ import com.ndedu.entity.FoodInfo;
 import com.ndedu.mapper.FoodCategoryMapper;
 import com.ndedu.service.FoodInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/food/info")
@@ -30,5 +27,27 @@ public class FoodInfoController {
         return Result.ok(result);
     }
 
+    @PostMapping
+    public Result add(@RequestBody FoodInfo food){
+        foodInfoService.addFood(food);
+        return Result.ok("添加成功");
+    }
 
+    @PutMapping
+    public Result update(@RequestBody FoodInfo food){
+        foodInfoService.updateFood(food);
+        return Result.ok("更新成功");
+    }
+
+    @GetMapping("/{id}")
+    public Result<FoodInfo> detail(@PathVariable Long id){
+        FoodInfo foodInfo = foodInfoService.getDetail(id);
+        return Result.ok(foodInfo);
+    }
+
+    @DeleteMapping("/{id}")
+    public Result delete(@PathVariable Long id) {
+        foodInfoService.deleteById(id);
+        return Result.ok("删除成功");
+    }
 }
