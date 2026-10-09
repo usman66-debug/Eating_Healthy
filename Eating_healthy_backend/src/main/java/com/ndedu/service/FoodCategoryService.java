@@ -3,7 +3,9 @@ package com.ndedu.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ndedu.Exception.BussinessException;
 import com.ndedu.entity.FoodCategory;
+import com.ndedu.entity.FoodInfo;
 import com.ndedu.mapper.FoodCategoryMapper;
+import com.ndedu.mapper.FoodInfoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,9 @@ public class FoodCategoryService {
 
     @Autowired
     private FoodCategoryMapper foodCategoryMapper;
+
+    @Autowired
+    private FoodInfoMapper foodInfoMapper;
 
     public List<FoodCategory> tree() {
         LambdaQueryWrapper<FoodCategory> queryWrapper = new LambdaQueryWrapper<>();
@@ -34,6 +39,31 @@ public class FoodCategoryService {
         foodCategoryMapper.insert(category);
     }
 
+    public void updateCategory(FoodCategory category){
+        LambdaQueryWrapper<FoodCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FoodCategory::getParentId, category.getParentId() != null ? category.getParentId() : 0L)
+                .eq(FoodCategory::getCategoryName, category.getCategoryName())
+                .ne(FoodCategory::getId, category.getId());
+        Long count = foodCategoryMapper.selectCount(queryWrapper);
+        if(count > 0){
+            throw new BussinessException("同级分类下已存在相同名称的分类");
+        }
+        foodCategoryMapper.updateById(category);
+    }
+
+    public void deleteCategory(Long id){
+        LambdaQueryWrapper<FoodCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FoodCategory::getParentId, id);
+        Long count = foodCategoryMapper.selectCount(queryWrapper);
+        if(count > 0){
+            throw new BussinessException("该分类下存在子分类，不能删除");
+        }
+        Long foodCount = foodInfoMapper.selectCount(new LambdaQueryWrapper<FoodInfo>().eq(FoodInfo::getCategoryId, id));
+        if(foodCount > 0){
+            throw new BussinessException("该分类下存在食物，不能删除");
+        }
+        foodCategoryMapper.deleteById(id);
+    }
 
     //递归构建树形结构
     private List<FoodCategory>buildTree(List<FoodCategory> allList, Long parentId) {

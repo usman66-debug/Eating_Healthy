@@ -26,4 +26,16 @@ public class FoodCategoryController {
         foodCategoryService.addCategory(category);
         return Result.ok("添加成功");
     }
+
+    @PutMapping
+    public Result<?> update(@RequestBody FoodCategory category){
+        foodCategoryService.updateCategory(category);
+        return Result.ok("更新成功");
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<?> delete(@PathVariable Long id){
+        foodCategoryService.deleteCategory(id);
+        return Result.ok("删除成功");
+    }
 }
