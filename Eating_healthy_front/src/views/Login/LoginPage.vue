@@ -63,6 +63,7 @@ import { reactive, ref } from 'vue'
 import { loginApi } from '@/apis/auth'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
 const router = useRouter()  
@@ -88,18 +89,22 @@ const loading = ref(false)
 const formRef = ref(null)
 
 const handleSubmit = async () => {
-    formRef.value.validate().then(async () => {
+    try {
+        if (!await formRef.value.validate(valid => valid)) return
         loading.value = true
         const res = await loginApi(form)
-        console.log(res)
-        loading.value = false
         userStore.setLoginInfo({
-          token: res.data.data.token,
-          userInfo: res.data.data.userInfo,
-          menuList: res.data.data.menus
+          token: res.data.token,
+          userInfo: res.data.userInfo,
+          menuList: res.data.menus
         })
-        router.push('/')
-    })
+        await router.push('/')
+    } catch (error) {
+        console.error('登录失败', error)
+        if (!error?.handled) ElMessage.error(error?.message || '登录失败')
+    } finally {
+        loading.value = false
+    }
 }
 
 </script>

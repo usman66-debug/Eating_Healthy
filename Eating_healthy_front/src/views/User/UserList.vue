@@ -137,10 +137,16 @@ const queryParams = reactive({
 
 const loadData =async () => {
     loading.value = true
-    const res = await getUserListApi(queryParams)
-    tableData.value = res.data.data.records
-    total.value = res.data.data.total
-    loading.value = false
+    try {
+        const res = await getUserListApi(queryParams)
+        tableData.value = res.data.records
+        total.value = res.data.total
+    } catch (error) {
+        console.error('加载用户列表失败', error)
+        if (!error?.handled) ElMessage.error(error?.message || '加载用户列表失败')
+    } finally {
+        loading.value = false
+    }
 }
 // 重置查询参数
 const resetQuery = () => {
@@ -188,15 +194,25 @@ const handleEdit = (row) => {
 }
 // 重置密码
 const handleResetPwd = async (row) => { 
-    await resetPasswordApi(row.id)
-    ElMessage.success('重置密码成功')
-    loadData()
+    try {
+        await resetPasswordApi(row.id)
+        ElMessage.success('重置密码成功')
+        await loadData()
+    } catch (error) {
+        console.error('重置密码失败', error)
+        if (!error?.handled) ElMessage.error(error?.message || '重置密码失败')
+    }
 }
 // 删除
 const handleDelete = async (row) => {
-    await deleteUserApi(row.id)
-    ElMessage.success('删除成功')
-    loadData()
+    try {
+        await deleteUserApi(row.id)
+        ElMessage.success('删除成功')
+        await loadData()
+    } catch (error) {
+        console.error('删除用户失败', error)
+        if (!error?.handled) ElMessage.error(error?.message || '删除用户失败')
+    }
  }
 // 弹窗
 const dialogVisible = ref(false)
@@ -220,8 +236,8 @@ const rules = reactive({
 
 // 提交表单
 const handleSubmit = async () => {
-    await formRef.value.validate(async (valid) => {
-        if (valid) {
+    try {
+        if (await formRef.value.validate(valid => valid)) {
             const payLoad = {user:formData,roleKey:formData.roleKey}
             if(!isEdit.value){
                 await addUserApi(payLoad)
@@ -229,10 +245,13 @@ const handleSubmit = async () => {
                 await updateUserApi(payLoad)
             }
             dialogVisible.value = false
-            loadData()
+            isEdit.value = false
+            await loadData()
         }
-    })
-    isEdit.value = false
+    } catch (error) {
+        console.error('保存用户失败', error)
+        if (!error?.handled) ElMessage.error(error?.message || '保存用户失败')
+    }
 }
 
 

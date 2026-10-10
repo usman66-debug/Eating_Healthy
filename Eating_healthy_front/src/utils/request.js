@@ -24,9 +24,14 @@ request.interceptors.request.use(
 //响应拦截器
 request.interceptors.response.use(
   response=>{
+    // 下载或需要响应头/HTTP 状态的接口可以显式保留原始 Axios 响应。
+    if (response.config.rawResponse || ['blob', 'arraybuffer'].includes(response.config.responseType)) {
+      return response
+    }
     const res = response.data
     if(res.code !== 200){
       ElMessage.error(res.message || '请求失败')
+      res.handled = true // 页面捕获后避免重复提示
       if(res.code === 401){
         localStorage.removeItem('token')
         localStorage.removeItem('userInfo')
@@ -35,9 +40,11 @@ request.interceptors.response.use(
       }
       return Promise.reject(res)
     }
-    return response
+    return res
   },
   error=>{
+    ElMessage.error(error.response?.data?.message || error.message || '请求失败')
+    error.handled = true
     return Promise.reject(error)
   }
 )
