@@ -30,4 +30,16 @@ public class FoodRecipeController {
         foodRecipeService.addRecipe(foodRecipe);
         return Result.ok("添加成功");
     }
+
+    @PutMapping
+    public Result<?> detail(@RequestBody FoodRecipe foodRecipe){
+        foodRecipeService.updateRecipe(foodRecipe);
+        return Result.ok("更新成功");
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<?> delete(@PathVariable Long id){
+        foodRecipeService.deleteRecipe(id);
+        return Result.ok("删除成功");
+    }
 }

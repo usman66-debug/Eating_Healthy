@@ -55,4 +55,24 @@ public class FoodRecipeService {
             }
         }
     }
+
+    public void updateRecipe(FoodRecipe foodRecipe){
+        //名称唯一性校验
+        long count = foodRecipeMapper.selectCount(new LambdaQueryWrapper<FoodRecipe>()
+                .eq(FoodRecipe::getRecipeName, foodRecipe.getRecipeName())
+                .ne(FoodRecipe::getId, foodRecipe.getId()));
+        if(count > 0){
+            throw new BussinessException("食谱名称已存在",400);
+        }
+        foodRecipeMapper.updateById(foodRecipe);
+        foodRecipeItemMapper.delete(new LambdaQueryWrapper<FoodRecipeItem>()
+                .eq(FoodRecipeItem::getRecipeId, foodRecipe.getId()));
+        addRecipeItems(foodRecipe.getId(), foodRecipe.getItems());
+    }
+
+    public void deleteRecipe(Long id){
+        foodRecipeMapper.deleteById(id);
+        foodRecipeItemMapper.delete(new LambdaQueryWrapper<FoodRecipeItem>()
+                .eq(FoodRecipeItem::getRecipeId, id));
+    }
 }
