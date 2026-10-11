@@ -33,6 +33,12 @@ public class FoodCategoryController {
         return Result.ok("更新成功");
     }
 
+    @GetMapping("/list")
+    public Result<List<FoodCategory>> list(){
+        List<FoodCategory> list = foodCategoryService.list();
+        return Result.ok(list);
+    }
+
     @DeleteMapping("/{id}")
     public Result<?> delete(@PathVariable Long id){
         foodCategoryService.deleteCategory(id);

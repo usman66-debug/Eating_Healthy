@@ -26,8 +26,8 @@ public class Result<T> {
 
     public static <T> Result<T> error(ResultCode resultCode){
         Result<T> result = new Result<>();
-        result.setCode(ResultCode.ERROR.getCode());
-        result.setMessage(ResultCode.ERROR.getMessage());
+        result.setCode(resultCode.getCode());
+        result.setMessage(resultCode.getMessage());
         return result;
     }
 

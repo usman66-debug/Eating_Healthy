@@ -29,9 +29,17 @@ const routes = [
       {
         path: 'food/category',
         name: 'FoodCategory',
-        component: () => import('@/food/CategoryList.vue'),
+        component: () => import('@/views/food/CategoryList.vue'),
         meta: {
           title: '食材分类',
+        },
+      },
+      {
+        path: 'food/list',
+        name: 'FoodList',
+        component: () => import('@/views/food/FoodList.vue'),
+        meta: {
+          title: '食材信息',
         },
       }
     ],

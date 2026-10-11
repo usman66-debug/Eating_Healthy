@@ -76,4 +76,8 @@ public class FoodCategoryService {
         }
         return tree;
     }
+
+    public List<FoodCategory> list(){
+        return foodCategoryMapper.selectList(null);
+    }
 }
