@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 @Service
@@ -74,5 +76,26 @@ public class FoodRecipeService {
         foodRecipeMapper.deleteById(id);
         foodRecipeItemMapper.delete(new LambdaQueryWrapper<FoodRecipeItem>()
                 .eq(FoodRecipeItem::getRecipeId, id));
+    }
+
+    public FoodRecipe getRecipe(Long id){
+        FoodRecipe recipe = foodRecipeMapper.selectById(id);
+        if(recipe == null){
+            throw new BussinessException("食谱不存在",404);
+        }
+        //查询食材关联
+        List<FoodRecipeItem> items = foodRecipeItemMapper.selectRecipeItems(id);
+        recipe.setItems(items);
+
+        //计算总热量
+        BigDecimal totalCalories = BigDecimal.ZERO;
+        for(FoodRecipeItem item : items){
+            if(item.getCalories() != null && item.getAmount() != null){
+                BigDecimal amountCalories = item.getAmount().divide(BigDecimal.valueOf(100),4,RoundingMode.HALF_UP);
+                totalCalories = totalCalories.add(item.getCalories().multiply(amountCalories));
+            }
+        }
+        recipe.setTotalCalories(totalCalories.setScale(2, RoundingMode.HALF_UP));
+        return recipe;
     }
 }

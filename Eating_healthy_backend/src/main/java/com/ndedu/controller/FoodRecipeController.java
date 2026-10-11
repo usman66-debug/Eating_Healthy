@@ -32,7 +32,7 @@ public class FoodRecipeController {
     }
 
     @PutMapping
-    public Result<?> detail(@RequestBody FoodRecipe foodRecipe){
+    public Result<?> update(@RequestBody FoodRecipe foodRecipe){
         foodRecipeService.updateRecipe(foodRecipe);
         return Result.ok("更新成功");
     }
@@ -41,5 +41,11 @@ public class FoodRecipeController {
     public Result<?> delete(@PathVariable Long id){
         foodRecipeService.deleteRecipe(id);
         return Result.ok("删除成功");
+    }
+
+    @GetMapping("/{id}")
+    public Result<?> getDetail(@PathVariable Long id){
+        FoodRecipe recipe = foodRecipeService.getRecipe(id);
+        return Result.ok(recipe);
     }
 }
