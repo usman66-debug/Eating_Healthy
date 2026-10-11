@@ -41,7 +41,15 @@ const routes = [
         meta: {
           title: '食材信息',
         },
-      }
+      },
+      {
+        path: 'food/recipe',
+        name: 'RecipeList',
+        component: () => import('@/views/food/RecipeList.vue'),
+        meta: {
+          title: '食谱管理',
+        },
+      },
     ],
   },
   {

@@ -74,3 +74,41 @@ export const deleteFood = (id) => {
     method: 'delete',
   })
 }
+
+export const getRecipeList = (params) => {
+  return request({
+    url: '/food/recipe/list',
+    method: 'get',
+    params,
+  })
+}
+
+export const addRecipe = (data) => {
+  return request({
+    url: '/food/recipe',
+    method: 'post',
+    data,
+  })
+}
+
+export const updateRecipe = (data) => {
+  return request({
+    url: '/food/recipe',
+    method: 'put',
+    data,
+  })
+}
+
+export const getRecipeDetail = (id) => {
+  return request({
+    url: `/food/recipe/${id}`,
+    method: 'get',
+  })
+}
+
+export const deleteRecipe = (id) => {
+  return request({
+    url: `/food/recipe/${id}`,
+    method: 'delete',
+  })
+}
