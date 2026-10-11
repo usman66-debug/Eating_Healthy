@@ -6,10 +6,7 @@ import com.ndedu.common.Result;
 import com.ndedu.entity.FoodRecipe;
 import com.ndedu.service.FoodRecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/food/recipe")
@@ -26,5 +23,11 @@ public class FoodRecipeController {
         Page<FoodRecipe> page = new Page<>(pageNum, pageSize);
         Page<FoodRecipe> recipes = foodRecipeService.listRecipes(page, keyword, mealType);
         return Result.ok(recipes);
+    }
+
+    @PostMapping
+    public Result<?> add(@RequestBody FoodRecipe foodRecipe){
+        foodRecipeService.addRecipe(foodRecipe);
+        return Result.ok("添加成功");
     }
 }

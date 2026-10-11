@@ -3,16 +3,23 @@ package com.ndedu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ndedu.Exception.BussinessException;
 import com.ndedu.entity.FoodRecipe;
+import com.ndedu.entity.FoodRecipeItem;
+import com.ndedu.mapper.FoodRecipeItemMapper;
 import com.ndedu.mapper.FoodRecipeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
+
 @Service
 public class FoodRecipeService {
     @Autowired
     private FoodRecipeMapper foodRecipeMapper;
+    @Autowired
+    private FoodRecipeItemMapper foodRecipeItemMapper;
 
     public Page<FoodRecipe> listRecipes(Page<FoodRecipe> page, String keyword, String mealType){
         LambdaQueryWrapper<FoodRecipe> queryWrapper = new LambdaQueryWrapper<>();
@@ -24,5 +31,28 @@ public class FoodRecipeService {
         }
         queryWrapper.orderByDesc(FoodRecipe::getCreateTime);
         return foodRecipeMapper.selectPage(page, queryWrapper);
+    }
+
+    public void addRecipe(FoodRecipe foodRecipe){
+        //名称唯一性校验
+        long count = foodRecipeMapper.selectCount(new LambdaQueryWrapper<FoodRecipe>()
+                .eq(FoodRecipe::getRecipeName, foodRecipe.getRecipeName()));
+        if(count > 0){
+            throw new BussinessException("食谱名称已存在",400);
+        }
+        foodRecipeMapper.insert(foodRecipe);
+        //批量保存食材关联
+        addRecipeItems(foodRecipe.getId(), foodRecipe.getItems());
+    }
+
+    //批量保存食材关联
+    public void addRecipeItems(Long recipeId, List<FoodRecipeItem> recipeItems){
+        if(recipeItems != null && !recipeItems.isEmpty()){
+            for(FoodRecipeItem item : recipeItems){
+                item.setId(null);
+                item.setRecipeId(recipeId);
+                foodRecipeItemMapper.insert(item);
+            }
+        }
     }
 }
