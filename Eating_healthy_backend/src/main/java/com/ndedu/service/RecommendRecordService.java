@@ -28,6 +28,8 @@ public class RecommendRecordService {
     private FoodInfoMapper foodInfoMapper;
     @Autowired
     private FoodRecipeMapper foodRecipeMapper;
+    @Autowired
+    private AiService aiService;
 
     public RecommendRecord getTodayRecommend(Long userId){
         RecommendRecord recommendRecord = recommendRecordMapper.selectOne(new LambdaQueryWrapper<RecommendRecord>()
@@ -40,7 +42,7 @@ public class RecommendRecordService {
             return recommendRecord;
         }
         //调用AI大模型推荐内容
-        return null;
+        return generateRecommend(userId);
     }
 
     public RecommendRecord generateRecommend(Long userId){
@@ -51,7 +53,15 @@ public class RecommendRecordService {
         //构建系统提示词
         String systemPrompt = "**你是一个专业的营养师。请根据用户的健康档案数据为其推荐今日三餐饮食方案。 请严格按照指定的JSON格式返回，不要添加任何额外文字说明。**";
         //调用AI大模型推荐
-        return null;
+        String jsonResult = aiService.chatForJson(systemPrompt, prompt);
+        RecommendRecord record = new RecommendRecord();
+        record.setUserId(userId);
+        record.setRecommendDate(LocalDate.now());
+        record.setContent(jsonResult);
+        record.setSource("AI");
+        record.setStatus(0);
+        recommendRecordMapper.insert(record);
+        return record;
     }
 
     public String buildDailyPrompt(UserHealthProfile profile){

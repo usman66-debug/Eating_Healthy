@@ -32,10 +32,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if(jwtUtils.validateToken(tokenRes)){
                     Long userId = jwtUtils.getUserId(tokenRes);
                     String username = jwtUtils.getUsername(tokenRes);
-                    System.out.println(userId);
-                    System.out.println(username);
                     //构建spring security 认证对象
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
                     //将认证信息存入Spring Security上下文
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }else{
