@@ -7,3 +7,33 @@ export function getAllRecords(params){
     params,
   })
 }
+
+export function getTodayRecommend(){
+  return request({
+    url:'/recommend/record/today',
+    method:'get',
+  })
+}
+
+export function generateRecommend(){
+  return request({
+    url:'/recommend/record/generate',
+    method:'post',
+  })
+}
+
+export function feedbackRecommend(data){
+  return request({
+    url:'/recommend/record/feedback',
+    method:'post',
+    data,
+  })
+}
+
+export function aiRecommend(data){
+  return request({
+    url:'/recommend/record/ai',
+    method:'post',
+    data,
+  })
+}

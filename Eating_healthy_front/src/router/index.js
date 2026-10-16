@@ -66,7 +66,14 @@ const routes = [
           title: '推荐记录',
         },
       },
-      
+      {
+        path:'recommend/ai',
+        name:'AIRecommend',
+        component: () => import('@/views/Recommend/AIRecommend.vue'),
+        meta: {
+          title: 'AI推荐',
+        },
+      }
     ],
   },
   {
