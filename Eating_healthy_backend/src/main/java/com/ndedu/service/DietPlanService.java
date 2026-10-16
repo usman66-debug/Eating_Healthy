@@ -2,18 +2,25 @@ package com.ndedu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ndedu.Exception.BussinessException;
 import com.ndedu.entity.DietPlan;
 import com.ndedu.entity.DietPlanItem;
+import com.ndedu.entity.RecommendRecord;
 import com.ndedu.entity.SysUser;
 import com.ndedu.mapper.DietPlanMapper;
 import com.ndedu.mapper.DietPlanItemMapper;
+import com.ndedu.mapper.RecommendRecordMapper;
 import com.ndedu.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DietPlanService {
@@ -24,6 +31,8 @@ public class DietPlanService {
     private SysUserMapper sysUserMapper;
     @Autowired
     private DietPlanItemMapper dietPlanItemMapper;
+    @Autowired
+    private RecommendRecordMapper recommendRecordMapper;
 
     public Page<DietPlan> listAll(Page<DietPlan> page, String keyword, String source, String date) {
         LambdaQueryWrapper<DietPlan> queryWrapper = new LambdaQueryWrapper<>();
@@ -47,6 +56,43 @@ public class DietPlanService {
         return result;
     }
 
+    public DietPlan createFromRecommend(Long recordId,Long userId){
+        RecommendRecord record = recommendRecordMapper.selectById(recordId);
+        if(record == null){
+            throw new BussinessException("推荐记录不存在");
+        }
+        if(!record.getUserId().equals(userId)){
+            throw new BussinessException("您没有权限操作该推荐记录");
+        }
+        //解析推荐内容
+        String content = record.getContent();
+        Map<String,Object> parsed;
+
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+            parsed = mapper.readValue(content, Map.class);
+        } catch(Exception e){
+            throw new BussinessException("推荐内容格式错误");
+        }
+
+        DietPlan plan = new DietPlan();
+        plan.setUserId(userId);
+        plan.setPlanDate(record.getRecommendDate());
+        plan.setPlanType("day");
+        plan.setSource("recommend");
+        plan.setStatus(0);
+
+        List<DietPlanItem> items = new ArrayList<>();
+        parseMeal(parsed,"breakfast",items);
+        parseMeal(parsed,"lunch",items);
+        parseMeal(parsed,"dinner",items);
+
+        plan.setItems(items);
+        calculateNutrition(plan);
+        dietPlanMapper.insert(plan);
+        return plan;
+    }
+
     //填充用户信息
     private void fillUserInfo(DietPlan item){
         if(item.getUserId() == null){
@@ -68,4 +114,53 @@ public class DietPlanService {
                 .eq(DietPlanItem::getPlanId, item.getId()));
         item.setItems(items);
     }
+
+    //三餐解析方案
+    private void parseMeal(Map<String, Object> parsed, String mealType, List<DietPlanItem> items) {
+        Object meal = parsed.get(mealType);
+        if (meal instanceof Map) {
+            Map<String, Object> mealData = (Map<String, Object>) meal;
+            DietPlanItem item = new DietPlanItem();
+            item.setMealType(mealType);
+            item.setFoodName(String.valueOf(mealData.getOrDefault("name", "")));
+            Object cal = mealData.get("calories");
+            if (cal instanceof Number) {
+                item.setCalories(BigDecimal.valueOf(((Number) cal).doubleValue()));
+            } else {
+                item.setCalories(BigDecimal.ZERO);
+            }
+            item.setAmount(BigDecimal.ONE);
+            item.setUnit("份");
+            items.add(item);
+        }
+    }
+
+    private void calculateNutrition(DietPlan plan) {
+        BigDecimal totalCal = BigDecimal.ZERO;
+        BigDecimal totalPro = BigDecimal.ZERO;
+        BigDecimal totalFat = BigDecimal.ZERO;
+        BigDecimal totalCarb = BigDecimal.ZERO;
+
+        if (plan.getItems() != null) {
+            for (DietPlanItem item : plan.getItems()) {
+                if (item.getCalories() != null) {
+                    totalCal = totalCal.add(item.getCalories());
+                }
+            }
+        }
+        plan.setTotalCalories(totalCal);
+        plan.setTotalProtein(totalPro);
+        plan.setTotalFat(totalFat);
+        plan.setTotalCarbohydrate(totalCarb);
+    }
+
+    private void saveItems(Long planId, List<DietPlanItem> items) {
+        if (items == null) return;
+        for (DietPlanItem item : items) {
+            item.setId(null);
+            item.setPlanId(planId);
+            dietPlanItemMapper.insert(item);
+        }
+    }
+
 }

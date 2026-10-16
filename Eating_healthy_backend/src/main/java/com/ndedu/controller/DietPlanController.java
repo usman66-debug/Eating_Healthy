@@ -6,10 +6,8 @@ import com.ndedu.common.Result;
 import com.ndedu.entity.DietPlan;
 import com.ndedu.service.DietPlanService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/diet-plan")
@@ -28,5 +26,18 @@ public class DietPlanController {
     Page<DietPlan> page = new Page<>(pageNum, pageSize);
     Page<DietPlan> result = dietPlanService.listAll(page, keyword, source, date);
     return Result.ok(result);
+    }
+
+    @PostMapping("/from-recommend/{recordId}")
+    public Result<DietPlan> fromRecommend(@PathVariable Long recordId){
+        Long userId = getCurrentUserId();
+        DietPlan plan = dietPlanService.createFromRecommend(recordId,userId);
+        return Result.ok(plan);
+    }
+
+    //获取用户ID
+    private Long getCurrentUserId(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return (Long) principal;
     }
 }
