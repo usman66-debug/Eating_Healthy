@@ -50,6 +50,23 @@ const routes = [
           title: '食谱管理',
         },
       },
+      {
+        path:'recommend/daily',
+        name:'DailyRecommend',
+        component: () => import('@/views/Recommend/DailyRecommend.vue'),
+        meta: {
+          title: '每日推荐',
+        },
+      },
+      {
+        path:'recommend/record',
+        name:'RecommendRecord',
+        component: () => import('@/views/Recommend/RecommendRecord.vue'),
+        meta: {
+          title: '推荐记录',
+        },
+      },
+      
     ],
   },
   {
