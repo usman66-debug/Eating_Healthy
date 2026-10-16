@@ -2,15 +2,10 @@ package com.ndedu.service;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ndedu.Exception.BussinessException;
-import com.ndedu.entity.FoodInfo;
-import com.ndedu.entity.FoodRecipe;
-import com.ndedu.entity.RecommendRecord;
-import com.ndedu.entity.UserHealthProfile;
-import com.ndedu.mapper.FoodInfoMapper;
-import com.ndedu.mapper.FoodRecipeItemMapper;
-import com.ndedu.mapper.FoodRecipeMapper;
-import com.ndedu.mapper.RecommendRecordMapper;
+import com.ndedu.entity.*;
+import com.ndedu.mapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,6 +26,8 @@ public class RecommendRecordService {
     private FoodRecipeMapper foodRecipeMapper;
     @Autowired
     private AiService aiService;
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     public RecommendRecord getTodayRecommend(Long userId){
         RecommendRecord recommendRecord = recommendRecordMapper.selectOne(new LambdaQueryWrapper<RecommendRecord>()
@@ -85,6 +82,45 @@ public class RecommendRecordService {
         record.setStatus(0);
         recommendRecordMapper.insert(record);
         return record;
+    }
+
+    public void feedback(Long userId, String feedback,Long recordId){
+        RecommendRecord recommendRecord = recommendRecordMapper.selectById(recordId);
+        if(recommendRecord == null){
+            throw new BussinessException("推荐记录不存在");
+        }
+        if(!recommendRecord.getUserId().equals(userId)){
+            throw new BussinessException("您没有权限反馈该推荐记录");
+        }
+        if(!StringUtils.hasText(feedback)){
+            throw new BussinessException("请输入您的反馈");
+        }
+        recommendRecord.setFeedback(feedback);
+        recommendRecordMapper.updateById(recommendRecord);
+    }
+
+    public Page<RecommendRecord> listRecords(Page<RecommendRecord> page, String date, String source){
+        LambdaQueryWrapper<RecommendRecord> query = new LambdaQueryWrapper<>();
+        if(StringUtils.hasText(date)){
+            query.eq(RecommendRecord::getRecommendDate, LocalDate.parse(date));
+        }
+        if(StringUtils.hasText(source)){
+            query.eq(RecommendRecord::getSource, source);
+        }
+        query.orderByDesc(RecommendRecord::getCreateTime);
+        Page<RecommendRecord> records = recommendRecordMapper.selectPage(page, query);
+        //填充用户信息
+        records.getRecords().forEach(record -> {
+            if(record.getUserId()!=null){
+                SysUser user = sysUserMapper.selectById(record.getUserId());
+                if(user != null){
+                    record.setNickname(user.getNickname());
+                    record.setUsername(user.getUsername());
+                    record.setAvatar(user.getAvatar());
+                }
+            }
+        });
+        return records;
     }
 
 
