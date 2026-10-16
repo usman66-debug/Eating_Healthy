@@ -73,6 +73,14 @@ const routes = [
         meta: {
           title: 'AI推荐',
         },
+      },
+      {
+        path:'diet-plan/list',
+        name:'DietPlanList',
+        component: () => import('@/views/Diet-plan/DietPlanList.vue'),
+        meta: {
+          title: '饮食计划列表',
+        },
       }
     ],
   },
