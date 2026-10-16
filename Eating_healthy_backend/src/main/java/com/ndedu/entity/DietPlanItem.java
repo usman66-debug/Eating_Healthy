@@ -43,4 +43,13 @@ public class DietPlanItem implements Serializable {
 
     /** 热量 */
     private BigDecimal calories;
+
+    /** 当前用量的蛋白质（g），历史未知数据为null */
+    private BigDecimal protein;
+
+    /** 当前用量的脂肪（g），历史未知数据为null */
+    private BigDecimal fat;
+
+    /** 当前用量的碳水化合物（g），历史未知数据为null */
+    private BigDecimal carbohydrate;
 }

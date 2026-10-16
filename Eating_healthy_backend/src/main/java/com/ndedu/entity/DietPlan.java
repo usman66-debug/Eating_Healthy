@@ -36,12 +36,15 @@ public class DietPlan implements Serializable {
     private BigDecimal totalCalories;
 
     /** 总蛋白质 */
+    @TableField(insertStrategy = FieldStrategy.ALWAYS)
     private BigDecimal totalProtein;
 
     /** 总脂肪 */
+    @TableField(insertStrategy = FieldStrategy.ALWAYS)
     private BigDecimal totalFat;
 
     /** 总碳水 */
+    @TableField(insertStrategy = FieldStrategy.ALWAYS)
     private BigDecimal totalCarbohydrate;
 
     /** 匹配度评分 */

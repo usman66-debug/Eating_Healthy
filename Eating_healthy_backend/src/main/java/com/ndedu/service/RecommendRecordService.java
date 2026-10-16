@@ -28,6 +28,8 @@ public class RecommendRecordService {
     private AiService aiService;
     @Autowired
     private SysUserMapper sysUserMapper;
+    @Autowired
+    private DietPlanService dietPlanService;
 
     public RecommendRecord getTodayRecommend(Long userId){
         RecommendRecord recommendRecord = recommendRecordMapper.selectOne(new LambdaQueryWrapper<RecommendRecord>()
@@ -55,7 +57,7 @@ public class RecommendRecordService {
         RecommendRecord record = new RecommendRecord();
         record.setUserId(userId);
         record.setRecommendDate(LocalDate.now());
-        record.setContent(jsonResult);
+        record.setContent(dietPlanService.normalizeRecommendNutrition(jsonResult));
         record.setSource("AI");
         record.setStatus(0);
         recommendRecordMapper.insert(record);
@@ -77,7 +79,7 @@ public class RecommendRecordService {
         RecommendRecord record = new RecommendRecord();
         record.setUserId(userId);
         record.setRecommendDate(LocalDate.now());
-        record.setContent(jsonResult);
+        record.setContent(dietPlanService.normalizeRecommendNutrition(jsonResult));
         record.setSource("AI");
         record.setStatus(0);
         recommendRecordMapper.insert(record);
@@ -154,9 +156,9 @@ public String buildDailyPrompt(UserHealthProfile profile){
 
     sb.append("\n请按以下JSON格式返回推荐方案：\n");
     sb.append("{\n");
-    sb.append("  \"breakfast\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
-    sb.append("  \"lunch\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
-    sb.append("  \"dinner\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"breakfast\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"lunch\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"dinner\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
     sb.append("  \"totalCalories\": 0,\n");
     sb.append("  \"nutritionAdvice\": \"\"\n");
     sb.append("}");
@@ -188,9 +190,9 @@ private String buildCustomPrompt(UserHealthProfile profile, String userRequest) 
 
     sb.append("\n请结合用户需求和健康档案，按以下JSON格式返回推荐方案：\n");
     sb.append("{\n");
-    sb.append("  \"breakfast\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
-    sb.append("  \"lunch\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
-    sb.append("  \"dinner\": {\"name\": \"\", \"foods\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"breakfast\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"lunch\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
+    sb.append("  \"dinner\": {\"name\": \"\", \"foods\": [], \"foodItems\": [], \"calories\": 0, \"description\": \"\"},\n");
     sb.append("  \"totalCalories\": 0,\n");
     sb.append("  \"nutritionAdvice\": \"\"\n");
     sb.append("}");
@@ -212,14 +214,25 @@ private String getActivityLabel(String level) {
 
 /** 附带食材库信息 */
 private void appendFoodList(StringBuilder sb) {
-    // 取出部分食材名称供AI参考
+    // 提供真实ID和每100g营养值，AI负责选择食材和克数，最终营养值由后端计算。
     List<FoodInfo> foods = foodInfoMapper.selectList(new LambdaQueryWrapper<FoodInfo>()
             .eq(FoodInfo::getStatus,0)
             .last("LIMIT 50"));
     if(!foods.isEmpty()){
-        String foodNames = foods.stream().map(FoodInfo::getFoodName).collect(Collectors.joining("、"));
-        sb.append("-可选食材库：").append(foodNames).append("\n");
+        sb.append("-可选食材库（营养值均为每100g）：\n");
+        for (FoodInfo food : foods) {
+            sb.append("ID=").append(food.getId()).append("，名称=").append(food.getFoodName())
+                    .append("，热量=").append(food.getCalories()).append("kcal")
+                    .append("，蛋白质=").append(food.getProtein()).append("g")
+                    .append("，脂肪=").append(food.getFat()).append("g")
+                    .append("，碳水=").append(food.getCarbohydrate()).append("g\n");
+        }
     }
+    sb.append("每餐必须包含非空foodItems数组，覆盖全部食材（包括配菜和用油）。")
+            .append("数组元素格式为{\"foodId\":1,\"amount\":100,\"unit\":\"g\"}，数字仅为示例。")
+            .append("foodId只能选用上述食材库的真实ID，不得虚构。amount为正数克数，最多两位小数，unit固定为g。")
+            .append("不能直接用份、个或ml参与计算，应提供对应克数；食谱也必须拆解为食材。")
+            .append("foods保留为食材名称和克数的文本数组。后端会按食材库重新计算营养总量。\n");
     //取出部分食谱名称供AI参考
     List<FoodRecipe> recipes = foodRecipeMapper.selectList(new LambdaQueryWrapper<FoodRecipe>()
             .eq(FoodRecipe::getStatus, 0)

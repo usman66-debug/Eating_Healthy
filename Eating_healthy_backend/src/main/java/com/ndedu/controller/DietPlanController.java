@@ -35,6 +35,19 @@ public class DietPlanController {
         return Result.ok(plan);
     }
 
+    @GetMapping("/{id}")
+    public Result<DietPlan> getDetail(@PathVariable Long id){
+        DietPlan plan = dietPlanService.getDetail(id);
+        return Result.ok(plan);
+    }
+
+    @DeleteMapping("/{id}")
+    public Result<Void> delete(@PathVariable Long id){
+        Long userId = getCurrentUserId();
+        dietPlanService.delete(id,userId);
+        return Result.ok();
+    }
+
     //获取用户ID
     private Long getCurrentUserId(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
