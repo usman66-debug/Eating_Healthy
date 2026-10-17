@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/diet-plan")
 public class DietPlanController {
@@ -46,6 +48,39 @@ public class DietPlanController {
         Long userId = getCurrentUserId();
         dietPlanService.delete(id,userId);
         return Result.ok();
+    }
+
+    @GetMapping("/my")
+    public Result<Page<DietPlan>> myPlan(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String date
+    ){
+        Long userId = getCurrentUserId();
+        Page<DietPlan> page = new Page<>(pageNum,pageSize);
+        Page<DietPlan> result = dietPlanService.listMyPlans(page,userId,date);
+        return Result.ok(result);
+    }
+    @PostMapping("/ai-generate")
+    public Result<DietPlan> aiGenerate(@RequestBody Map<String,String> params){
+        Long userId = getCurrentUserId();
+        String foodDescription = params.get("foodDescription");
+        DietPlan plan = dietPlanService.aiGeneratePlan(userId,foodDescription);
+        return Result.ok(plan);
+    }
+
+    @PostMapping
+    public Result<?> create(@RequestBody DietPlan plan){
+        plan.setUserId(getCurrentUserId());
+        dietPlanService.createPlan(plan);
+        return Result.ok("创建成功");
+    }
+
+    @PutMapping("/{id}/complete")
+    public Result<?> complete(@PathVariable Long id){
+        Long userId = getCurrentUserId();
+        dietPlanService.completePlan(id,userId);
+        return Result.ok("标记完成");
     }
 
     //获取用户ID
