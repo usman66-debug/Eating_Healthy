@@ -125,6 +125,30 @@ const routes = [
           title: '用户首页',
         },
       },
+      {
+        path: 'food',
+        name: 'UserFood',
+        component: () => import('@/views/food/FoodList.vue'),
+        meta: {
+          title: '用户食材',
+        },
+      },
+      {
+        path: 'recipe',
+        name: 'UserRecipe',
+        component: () => import('@/views/food/RecipeList.vue'),
+        meta: {
+          title: '用户食谱',
+        },
+      },
+      {
+        path: 'health',
+        name: 'UserHealth',
+        component: () => import('@/views/Health/HealthProfile.vue'),
+        meta: {
+          title: '用户健康档案',
+        },
+      }
     ],
   },
   {
