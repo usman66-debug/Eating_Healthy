@@ -125,6 +125,16 @@ public class RecommendRecordService {
         return records;
     }
 
+    public Page<RecommendRecord> listMyRecords(Page<RecommendRecord> page, Long userId, String date){
+        LambdaQueryWrapper<RecommendRecord> query = new LambdaQueryWrapper<>();
+        if(StringUtils.hasText(date)){
+            query.eq(RecommendRecord::getRecommendDate, LocalDate.parse(date));
+        }
+        query.eq(RecommendRecord::getUserId, userId);
+        query.orderByDesc(RecommendRecord::getCreateTime);
+        return recommendRecordMapper.selectPage(page, query);
+    }
+
 
 public String buildDailyPrompt(UserHealthProfile profile){
     StringBuilder sb = new StringBuilder();

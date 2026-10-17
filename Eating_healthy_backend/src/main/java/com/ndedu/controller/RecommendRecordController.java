@@ -55,7 +55,17 @@ public class RecommendRecordController {
         return Result.ok(records);
     }
 
-
+    @GetMapping("/my")
+    public Result<Page<RecommendRecord>> myRecords(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String date
+    ){
+        Long userId = getCurrentUserId();
+        Page<RecommendRecord> page = new Page<>(pageNum, pageSize);
+        Page<RecommendRecord> records = recommendRecordService.listMyRecords(page, userId, date);
+        return Result.ok(records);
+    }
 
     //获取用户ID
     private Long getCurrentUserId(){
