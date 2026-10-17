@@ -29,13 +29,13 @@ public class SysNoticeController {
     }
 
     @PostMapping
-    public Result addNotice(SysNotice notice){
+    public Result addNotice(@RequestBody SysNotice notice){
         sysNoticeService.addNotice(notice);
         return Result.ok("添加成功");
     }
 
     @PutMapping
-    public Result updateNotice(SysNotice notice){
+    public Result updateNotice(@RequestBody SysNotice notice){
         sysNoticeService.updateNotice(notice);
         return Result.ok("更新成功");
     }
