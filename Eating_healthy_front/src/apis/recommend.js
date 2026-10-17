@@ -37,3 +37,11 @@ export function aiRecommend(data){
     data,
   })
 }
+
+export function getRecommendHistory(params){
+  return request({
+    url:'/recommend/record/my',
+    method:'get',
+    params, 
+  })
+}

@@ -55,6 +55,9 @@
 </template>
 <script setup>
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+
+const $router = useRouter()
 
 const userStore = useUserStore()
 
@@ -68,7 +71,14 @@ const navItems = [
   { label: '推荐历史', path: '/home/recommend/history', icon: 'Clock' }
 ]
 
-const handleCommand = () => {}
+const handleCommand = (command) => {
+  if (command === 'profile') {
+    $router.push('/home/profile')
+  } else if (command === 'logout') {
+    userStore.logout()
+    $router.push('/login')
+  }
+}
 </script>
 <style scoped>
 .user-layout {

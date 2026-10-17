@@ -164,6 +164,22 @@ const routes = [
         meta: {
           title: '用户饮食计划',
         },
+      },
+      {
+        path:'recommend/history',
+        name:'UserDietPlanHistory',
+        component: () => import('@/views/Recommend/RecommendHistory.vue'),
+        meta: {
+          title: '用户推荐历史',
+        },
+      },
+      {
+        path: 'profile',
+        name: 'UserProfile',
+        component: () => import('@/views/User/Profile.vue'),
+        meta: {
+          title: '用户个人中心',
+        },
       }
     ],
   },
