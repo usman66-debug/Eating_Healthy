@@ -177,6 +177,33 @@ public class SysUserService {
         return dto;
     }
 
+    public void updateProfile(SysUser user){
+        SysUser sysUser = sysUserMapper.selectById(user.getId());
+        if(sysUser == null){
+            throw new BussinessException("用户不存在");
+        }
+        //更新用户信息
+        sysUser.setNickname(user.getNickname());
+        sysUser.setPhone(user.getPhone());
+        sysUser.setEmail(user.getEmail());
+        sysUser.setGender(user.getGender());
+        sysUser.setAvatar(user.getAvatar());
+        sysUserMapper.updateById(sysUser);
+    }
+
+    public void changePassword(Long userId,String oldPassword,String newPassword){
+        SysUser sysUser = sysUserMapper.selectById(userId);
+        if(sysUser == null){
+            throw new BussinessException("用户不存在");
+        }
+        if (!sysUser.getPassword().equals(oldPassword)){
+            throw new BussinessException("旧密码错误");
+        }
+        //更新密码
+        sysUser.setPassword(newPassword);
+        sysUserMapper.updateById(sysUser);
+    }
+
     //构建菜单树
     private List<SysMenu> buildMenuTree(List<SysMenu> menus, Long parentId){
         return menus.stream()
