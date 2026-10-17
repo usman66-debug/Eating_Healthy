@@ -39,12 +39,20 @@ export const useUserStore = defineStore('user',()=>{
     localStorage.removeItem('menuList')
   }
 
+  const updateUserInfo = (payload)=>{
+    if(userInfo.value){
+      Object.assign(userInfo.value,payload)
+      localStorage.setItem('userInfo',JSON.stringify(userInfo.value))
+    }
+  }
+
   return {
     token,
     userInfo,
     menuList,
     setLoginInfo,
     isAdmin,
-    logout
+    logout,
+    updateUserInfo
   }
 })

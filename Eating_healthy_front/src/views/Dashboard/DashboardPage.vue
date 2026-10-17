@@ -113,6 +113,7 @@
 <script setup>
 import { computed, reactive, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { getDashboardStatsData, getDashboardChartsData } from '@/apis/dashboard'
+import { getNoticeActive } from '@/apis/notice'
 import { useUserStore } from '@/stores/user'
 import * as echarts from 'echarts'
 
@@ -248,7 +249,10 @@ function handleResize() {
   pieChart?.resize()
 }
 
-async function loadNotices() {}
+async function loadNotices() {
+  const res = await getNoticeActive()
+  notices.value = res.data || []
+}
 
 onMounted(() => {
   loadStats()

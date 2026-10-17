@@ -30,3 +30,10 @@ export function deleteNotice(id){
     method: 'delete',
   })
 }
+
+export function getNoticeActive(){
+  return request({
+    url: `/notice/active`,
+    method: 'get',
+  })
+}

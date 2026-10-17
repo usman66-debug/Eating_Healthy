@@ -27,6 +27,14 @@ const routes = [
         },
       },
       {
+        path: 'user/profile',
+        name: 'UserProfile',
+        component: () => import('@/views/User/Profile.vue'),
+        meta: {
+          title: '用户信息',
+        },
+      },
+      {
         path: 'food/category',
         name: 'FoodCategory',
         component: () => import('@/views/food/CategoryList.vue'),
