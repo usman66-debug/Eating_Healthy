@@ -2,11 +2,16 @@ package com.ndedu.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ndedu.common.Result;
+import com.ndedu.entity.DietPlan;
+import com.ndedu.entity.DietPlanItem;
 import com.ndedu.entity.FoodCategory;
 import com.ndedu.entity.FoodInfo;
 import com.ndedu.entity.FoodRecipe;
 import com.ndedu.entity.RecommendRecord;
 import com.ndedu.entity.SysUser;
+import com.ndedu.entity.UserHealthProfile;
+import com.ndedu.mapper.DietPlanItemMapper;
+import com.ndedu.mapper.DietPlanMapper;
 import com.ndedu.mapper.FoodCategoryMapper;
 import com.ndedu.mapper.FoodInfoMapper;
 import com.ndedu.mapper.FoodRecipeMapper;
@@ -14,10 +19,12 @@ import com.ndedu.mapper.RecommendRecordMapper;
 import com.ndedu.mapper.SysUserMapper;
 import com.ndedu.mapper.UserHealthProfileMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,6 +48,10 @@ public class DashboardController {
     private UserHealthProfileMapper userHealthProfileMapper;
     @Autowired
     private FoodCategoryMapper foodCategoryMapper;
+    @Autowired
+    private DietPlanMapper dietPlanMapper;
+    @Autowired
+    private DietPlanItemMapper dietPlanItemMapper;
 
     @GetMapping("/admin/stats")
     public Result<Map<String, Object>> adminStats() {
@@ -89,6 +100,46 @@ public class DashboardController {
             }
         }
         data.put("categoryDistribution", categoryDistribution);
+
+        return Result.ok(data);
+    }
+
+    @GetMapping("/user/overview")
+    public Result<Map<String, Object>> userOverview() {
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Map<String, Object> data = new LinkedHashMap<>();
+        LocalDate today = LocalDate.now();
+
+        List<DietPlan> todayPlans = dietPlanMapper.selectList(
+                new LambdaQueryWrapper<DietPlan>()
+                        .eq(DietPlan::getUserId, userId)
+                        .eq(DietPlan::getPlanDate, today));
+
+        BigDecimal totalCalories = BigDecimal.ZERO;
+        int todayFoodCount = 0;
+        for (DietPlan plan : todayPlans) {
+            List<DietPlanItem> items = dietPlanItemMapper.selectList(
+                    new LambdaQueryWrapper<DietPlanItem>().eq(DietPlanItem::getPlanId, plan.getId()));
+            for (DietPlanItem item : items) {
+                if (item.getCalories() != null) {
+                    totalCalories = totalCalories.add(item.getCalories());
+                }
+            }
+            todayFoodCount += items.size();
+        }
+
+        UserHealthProfile profile = userHealthProfileMapper.selectOne(
+                new LambdaQueryWrapper<UserHealthProfile>().eq(UserHealthProfile::getUserId, userId));
+
+        data.put("todayCalories", totalCalories.intValue());
+        data.put("todayPlanCount", todayPlans.size());
+        data.put("todayFoodCount", todayFoodCount);
+        data.put("hasProfile", profile != null);
+        data.put("targetCalories", profile != null && profile.getTargetCalories() != null ? profile.getTargetCalories().intValue() : 0);
+        data.put("recommendCount", recommendRecordMapper.selectCount(
+                new LambdaQueryWrapper<RecommendRecord>().eq(RecommendRecord::getUserId, userId)));
+        data.put("planTotal", dietPlanMapper.selectCount(
+                new LambdaQueryWrapper<DietPlan>().eq(DietPlan::getUserId, userId)));
 
         return Result.ok(data);
     }
