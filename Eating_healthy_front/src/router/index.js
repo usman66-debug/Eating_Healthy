@@ -148,6 +148,22 @@ const routes = [
         meta: {
           title: '用户健康档案',
         },
+      },
+      {
+        path:'recommend',
+        name:'UserRecommend',
+        component: () => import('@/views/Recommend/DailyRecommend.vue'),
+        meta: {
+          title: '用户推荐',
+        },
+      },
+      {
+        path:'diet-plan',
+        name:'UserDietPlan',
+        component: () => import('@/views/Diet-plan/MyDietPlan.vue'),
+        meta: {
+          title: '用户饮食计划',
+        },
       }
     ],
   },
