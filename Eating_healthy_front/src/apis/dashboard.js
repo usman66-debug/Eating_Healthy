@@ -13,3 +13,10 @@ export function getDashboardChartsData() {
     method: 'get',
   })
 }
+
+export function getDashboardOverviewData() {
+  return request({
+    url: '/dashboard/user/overview',
+    method: 'get',
+  })
+}

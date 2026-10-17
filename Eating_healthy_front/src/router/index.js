@@ -109,6 +109,25 @@ const routes = [
     ],
   },
   {
+    path:'/home',
+    name:'Home',
+    redirect:'/home/index',
+    component: () => import('@/layouts/UserLayout.vue'),
+    meta: {
+      title: '用户首页',
+    },
+    children: [
+      {
+        path:'index',
+        name:'UserHome',
+        component: () => import('@/views/home/UserHome.vue'),
+        meta: {
+          title: '用户首页',
+        },
+      },
+    ],
+  },
+  {
     path:'/login',
     name:'Login',
     component: () => import('@/views/Login/LoginPage.vue'),
