@@ -81,6 +81,22 @@ const routes = [
         meta: {
           title: '饮食计划列表',
         },
+      },
+      {
+        path:'health/list',
+        name:'HealthProfileList',
+        component: () => import('@/views/Health/HealthProfileList.vue'),
+        meta: {
+          title: '健康档案',
+        },
+      },
+      {
+        path:'notice/list',
+        name:'NoticeList',
+        component: () => import('@/views/notice/NoticeList.vue'),
+        meta: {
+          title: '系统公告',
+        },
       }
     ],
   },

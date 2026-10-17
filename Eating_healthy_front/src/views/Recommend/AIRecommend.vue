@@ -132,6 +132,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { getTodayRecommend, generateRecommend, feedbackRecommend, aiRecommend } from '@/apis/recommend'
+import { createDietPlan } from '@/apis/diet-plan'
 import { ElMessage } from 'element-plus'
 
 onMounted(async() => {
@@ -202,7 +203,13 @@ const handleFeedback = async (type) => {
     ElMessage.success('反馈成功')
 }
 // 生成清单
-const handleCreatePlan = () => {}
+const handleCreatePlan = async () => {
+    if(!currentRecord.value.id){
+        return ElMessage.error('请先生成推荐')
+    }
+    const res = await createDietPlan(currentRecord.value.id)
+    ElMessage.success('清单生成成功')
+}
 // 处理AI推荐
 const handleAiRecommend = async () => {
     if(!userRequest.value.trim()){

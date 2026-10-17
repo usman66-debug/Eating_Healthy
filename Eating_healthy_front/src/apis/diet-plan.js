@@ -22,3 +22,10 @@ export function deleteDietPlanDetail(id){
     method:'delete',
   })
 }
+
+export function createDietPlan(recordId){
+  return request({
+    url:`/diet-plan/from-recommend/${recordId}`,
+    method:'post'
+  })
+}
